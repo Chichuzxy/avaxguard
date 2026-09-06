@@ -10,10 +10,10 @@
   <text x="180" y="195" font-size="150" text-anchor="middle">🐼</text>
   <!-- 右侧文字 -->
   <text x="320" y="140" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#C96A22">AvaxGuard</text>
-  <text x="322" y="190" font-family="'Microsoft YaHei', Arial, sans-serif" font-size="34" fill="#3D2E23">Avalanche 授权安全管家</text>
-  <text x="322" y="232" font-family="'Microsoft YaHei', Arial, sans-serif" font-size="20" fill="#8A7A6A">扫描授权 · AI 分级 · 签名前预览 · 一键 Revoke · 链上秒确认</text>
+  <text x="322" y="188" font-family="'Microsoft YaHei', Arial, sans-serif" font-size="32" fill="#3D2E23">Avalanche 授权安全管家</text>
+  <text x="322" y="228" font-family="'Microsoft YaHei', Arial, sans-serif" font-size="20" fill="#8A7A6A">扫描授权 · AI 分级 · 一键 Revoke</text>
   <!-- 底部风险色条 -->
-  <rect x="322" y="254" width="22" height="10" rx="3" fill="#D64545"/>
-  <rect x="352" y="254" width="22" height="10" rx="3" fill="#E0A226"/>
-  <rect x="382" y="254" width="22" height="10" rx="3" fill="#4C9A5A"/>
+  <rect x="322" y="248" width="22" height="10" rx="3" fill="#D64545"/>
+  <rect x="352" y="248" width="22" height="10" rx="3" fill="#E0A226"/>
+  <rect x="382" y="248" width="22" height="10" rx="3" fill="#4C9A5A"/>
 </svg>
