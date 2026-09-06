@@ -494,7 +494,13 @@ $('btnRevokeAll').addEventListener('click', async () => {
         method: 'eth_sendTransaction',
         params: [{ from, to: token, data, gas: '0xea60' }],
       });
-      itemBox.innerHTML = `✅ 已撤销 (${tokenSymbol(token)})<br><code>${txHash.slice(0, 14)}...</code>`;
+      // 与单条 revoke 一致: 写入 txResults + 持久化, 附验证/清除按钮, 避免实时刷新冲掉
+      const key = (token + spender).toLowerCase();
+      txResults[key] = `✅ 交易已广播<br>txHash: <code>${txHash}</code><br>
+      <button class="small green" style="margin-top:6px" data-verify="${txHash}" data-token="${token}" data-spender="${spender}">验证链上结果</button>
+      <button class="small secondary" style="margin-top:6px;margin-left:6px" data-clear="${key}">✕ 清除记录</button>`;
+      itemBox.innerHTML = txResults[key];
+      saveTxResults(); // 持久化, 刷新后仍可加载
       done++;
     } catch (e) {
       itemBox.innerHTML = '<span style="color:var(--red)">跳过: ' + (e.message || e) + '</span>';
@@ -503,6 +509,8 @@ $('btnRevokeAll').addEventListener('click', async () => {
     reportBox.innerHTML = '<span class="spin"></span> 批量撤销进度: ' + done + ' 成功 / ' + failed + ' 失败';
   }
   reportBox.innerHTML = '批量撤销完成: ' + done + ' 项成功' + (failed ? ', ' + failed + ' 项失败/跳过' : '') + '。<br>可重新扫描确认链上状态。';
+  bindVerifyButtons(); // 批量生成的验证按钮也要能点击
+  bindClearButtons();  // 批量生成的清除按钮也要能点击
   markStep(4);
 });
 
