@@ -156,6 +156,7 @@
     <div class="row">
       <button class="secondary" id="btnReport">生成 AI 风险报告</button>
       <button class="green" id="btnRevokeAll" style="display:none">🛡 批量撤销全部授权</button>
+      <button class="secondary" id="btnRefresh">▶ 开启实时刷新</button>
     </div>
     <div class="report" id="reportBox"></div>
   </div>
@@ -184,6 +185,9 @@ function tokenSymbol(addr) {
 const $ = (id) => document.getElementById(id);
 let currentOwner = null;
 let scanItems = [];
+let refreshTimer = null;      // 实时刷新定时器
+let refreshOn = false;        // 实时刷新开关
+let selectedKeys = new Set(); // 已勾选的 token+spender (刷新后保留勾选)
 
 // ---------- helpers ----------
 function humanAmount(amtStr) {
@@ -251,17 +255,17 @@ $('btnConnect').addEventListener('click', async () => {
 });
 
 // ---------- scan ----------
-async function doScan(owner) {
-  setStatus('扫描链上授权...', true);
+async function doScan(owner, silent) {
+  if (!silent) setStatus('扫描链上授权...', true);
   try {
     const data = await api('/scan', { address: owner });
     scanItems = data.items;
     renderItems(scanItems);
     $('scanCard').style.display = 'block';
     markStep(2);
-    setStatus('');
+    if (!silent) setStatus('');
   } catch (e) {
-    setStatus('扫描失败: ' + e.message);
+    if (!silent) setStatus('扫描失败: ' + e.message);
   }
 }
 
@@ -270,7 +274,30 @@ $('btnScan').addEventListener('click', () => {
   if (!/^0x[0-9a-fA-F]{40}$/.test(v)) { setStatus('地址格式错误'); return; }
   currentOwner = v;
   doScan(v);
+  startRefresh(); // 扫描后自动开启实时刷新
 });
+
+// ---------- 实时刷新 (每 4 秒静默重扫, 保留勾选) ----------
+function startRefresh() {
+  stopRefresh();
+  refreshOn = true;
+  updateRefreshBtn();
+  refreshTimer = setInterval(() => {
+    if (currentOwner) doScan(currentOwner, true);
+  }, 4000);
+}
+function stopRefresh() {
+  if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+  refreshOn = false;
+  updateRefreshBtn();
+}
+function toggleRefresh() {
+  refreshOn ? stopRefresh() : startRefresh();
+}
+function updateRefreshBtn() {
+  const btn = $('btnRefresh');
+  if (btn) btn.textContent = refreshOn ? '⏸ 暂停实时刷新' : '▶ 开启实时刷新';
+}
 
 function renderItems(items) {
   const list = $('itemList');
@@ -288,10 +315,12 @@ function renderItems(items) {
     const div = document.createElement('div');
     div.className = 'item';
     const label = it.grade.label ? ' · ' + it.grade.label : '';
-    // 勾选框: 每条授权可单独选择, 配合"批量撤销选中"
+    // 勾选框: 每条授权可单独选择, 配合"批量撤销选中"; 刷新后恢复勾选
+    const key = (it.token + it.spender).toLowerCase();
+    const checked = selectedKeys.has(key) ? 'checked' : '';
     div.innerHTML = `
       <div class="top">
-        <input type="checkbox" class="revoke-check" data-token="${it.token}" data-spender="${it.spender}" style="width:18px;height:18px;cursor:pointer;flex:none">
+        <input type="checkbox" class="revoke-check" data-token="${it.token}" data-spender="${it.spender}" ${checked} style="width:18px;height:18px;cursor:pointer;flex:none">
         <span class="lv ${it.grade.level}">${it.grade.level === 'critical' ? '严重' : it.grade.level === 'high' ? '高' : it.grade.level === 'medium' ? '中' : '无'}</span>
         <span class="spender">${it.spender}</span>${label}
       </div>
@@ -307,9 +336,13 @@ function renderItems(items) {
   list.querySelectorAll('button[data-act]').forEach((btn) => {
     btn.addEventListener('click', () => onItemAction(btn));
   });
-  // 勾选框变化时更新批量按钮文案
+  // 勾选框变化时更新批量按钮文案 + 记录勾选 (刷新后保留)
   list.querySelectorAll('.revoke-check').forEach((cb) => {
-    cb.addEventListener('change', () => updateRevokeAllBtn());
+    cb.addEventListener('change', () => {
+      const key = (cb.dataset.token + cb.dataset.spender).toLowerCase();
+      if (cb.checked) selectedKeys.add(key); else selectedKeys.delete(key);
+      updateRevokeAllBtn();
+    });
   });
   updateRevokeAllBtn();
 }
@@ -445,6 +478,9 @@ async function verifyTx(txHash, box, token, owner, spender) {
     box.innerHTML = '<span style="color:var(--red)">验证失败: ' + e.message + '</span>';
   }
 }
+
+// ---------- 实时刷新开关 ----------
+$('btnRefresh').addEventListener('click', toggleRefresh);
 
 // ---------- AI report ----------
 $('btnReport').addEventListener('click', async () => {
