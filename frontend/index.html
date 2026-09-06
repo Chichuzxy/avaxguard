@@ -171,6 +171,14 @@
 <script>
 // ---------- config (token/spender 默认值由后端环境变量提供, 前端零配置) ----------
 const EXPLORER = 'https://subnets-test.avax.network/c-chain';
+// token 地址 -> 符号名 (多 token 扫描时显示可读名)
+const TOKEN_SYMBOLS = {
+  '0xaadefe134d613bed06ebb6ce3bc86bde9d1378e5': 'mUSDC',
+  '0x88c882b1c885ccfcdbb2589726e50d0427f6566e': 'mUSDT',
+};
+function tokenSymbol(addr) {
+  return TOKEN_SYMBOLS[(addr || '').toLowerCase()] || 'token';
+}
 
 const $ = (id) => document.getElementById(id);
 let currentOwner = null;
@@ -283,7 +291,7 @@ function renderItems(items) {
         <span class="lv ${it.grade.level}">${it.grade.level === 'critical' ? '严重' : it.grade.level === 'high' ? '高' : it.grade.level === 'medium' ? '中' : '无'}</span>
         <span class="spender">${it.spender}</span>${label}
       </div>
-      <div class="meta">授权额度: ${isMax ? '∞ 无限授权' : it.amountHuman + ' mUSDC'} · token: ${shortAddr(it.token)}</div>
+      <div class="meta">授权额度: ${isMax ? '∞ 无限授权' : it.amountHuman + ' ' + tokenSymbol(it.token)} · token: ${tokenSymbol(it.token)} (${shortAddr(it.token)})</div>
       <div class="reason">${it.grade.reason}</div>
       <div class="actions">
         <button class="small secondary" data-act="preview" data-token="${it.token}" data-spender="${it.spender}">🔍 模拟预览</button>

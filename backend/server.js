@@ -25,8 +25,9 @@ const path = require('path');
 // ---------- config ----------
 const PORT = process.env.PORT || 3001;
 const RPC = process.env.FUJI_RPC || 'https://api.avax-test.network/ext/bc/C/rpc';
-// demo token: MockUSDC (fill after deployment to Fuji)
+// demo tokens: MockUSDC + MockUSDT (多 token 扫描)
 const MOCK_USDC = process.env.MOCK_USDC_ADDR || '0x0000000000000000000000000000000000000000';
+const MOCK_USDT = process.env.MOCK_USDT_ADDR || '0x0000000000000000000000000000000000000000';
 // demo spender presets (address:label)
 const RISK_SPENDERS = parseRisk(process.env.RISK_SPENDERS || '');
 // DeepSeek AI 润色 (可选: 不配置则纯规则引擎)
@@ -111,7 +112,10 @@ function isAddr(s) {
 // default demo tokens/spenders come from env (single source of truth)
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 function defaultTokens() {
-  return (isAddr(MOCK_USDC) && MOCK_USDC.toLowerCase() !== ZERO_ADDR) ? [MOCK_USDC.toLowerCase()] : [];
+  const tokens = [];
+  if (isAddr(MOCK_USDC) && MOCK_USDC.toLowerCase() !== ZERO_ADDR) tokens.push(MOCK_USDC.toLowerCase());
+  if (isAddr(MOCK_USDT) && MOCK_USDT.toLowerCase() !== ZERO_ADDR) tokens.push(MOCK_USDT.toLowerCase());
+  return tokens;
 }
 function defaultSpenders() {
   return Object.keys(RISK_SPENDERS);
