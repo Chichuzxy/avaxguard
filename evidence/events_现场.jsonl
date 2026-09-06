@@ -1,0 +1,14 @@
+{"ts":"2026-09-06T05:44:48.484Z","type":"scan","owner":"0xdb03374034ca16afe997038266886327d1efd3af","tokens":1,"spenders":2,"active":2}
+{"ts":"2026-09-06T05:48:41.328Z","type":"scan","owner":"0xdb03374034ca16afe997038266886327d1efd3af","tokens":1,"spenders":2,"active":2}
+{"ts":"2026-09-06T05:49:15.456Z","type":"preview","token":"0xaadefe134d613bed06ebb6ce3bc86bde9d1378e5","owner":"0xdb03374034ca16afe997038266886327d1efd3af","spender":"0x000000000000000000000000000000000000dead","before":"500000000","after":"0","verdict":"READY_TO_REVOKE"}
+{"ts":"2026-09-06T05:49:17.800Z","type":"preview","token":"0xaadefe134d613bed06ebb6ce3bc86bde9d1378e5","owner":"0xdb03374034ca16afe997038266886327d1efd3af","spender":"0x1111111111111111111111111111111111111111","before":"115792089237316195423570985008687907853269984665640564039457584007913129639935","after":"0","verdict":"READY_TO_REVOKE"}
+{"ts":"2026-09-06T05:50:02.083Z","type":"report","items":2,"usedAI":true}
+{"ts":"2026-09-06T05:57:30.060Z","type":"scan","owner":"0xdb03374034ca16afe997038266886327d1efd3af","tokens":1,"spenders":2,"active":2}
+{"ts":"2026-09-06T05:57:32.685Z","type":"preview","token":"0xaadefe134d613bed06ebb6ce3bc86bde9d1378e5","owner":"0xdb03374034ca16afe997038266886327d1efd3af","spender":"0x1111111111111111111111111111111111111111","before":"115792089237316195423570985008687907853269984665640564039457584007913129639935","after":"0","verdict":"READY_TO_REVOKE"}
+{"ts":"2026-09-06T06:01:53.066Z","type":"scan","owner":"0xdb03374034ca16afe997038266886327d1efd3af","tokens":1,"spenders":2,"active":2}
+{"ts":"2026-09-06T06:02:22.593Z","type":"preview","token":"0xaadefe134d613bed06ebb6ce3bc86bde9d1378e5","owner":"0xdb03374034ca16afe997038266886327d1efd3af","spender":"0x000000000000000000000000000000000000dead","before":"500000000","after":"0","verdict":"READY_TO_REVOKE"}
+{"ts":"2026-09-06T06:02:24.621Z","type":"preview","token":"0xaadefe134d613bed06ebb6ce3bc86bde9d1378e5","owner":"0xdb03374034ca16afe997038266886327d1efd3af","spender":"0x1111111111111111111111111111111111111111","before":"115792089237316195423570985008687907853269984665640564039457584007913129639935","after":"0","verdict":"READY_TO_REVOKE"}
+{"ts":"2026-09-06T06:02:46.422Z","type":"report","items":2,"usedAI":true}
+{"ts":"2026-09-06T06:05:00.755Z","type":"verify","txHash":"0xe05289aaaca36bbeef3efdb99412ae20b3e57f502ba1ae5483d21f2a0e45093a","status":"SUCCESS","blockNumber":58214561,"allowanceAfter":"0"}
+{"ts":"2026-09-06T06:06:21.559Z","type":"scan","owner":"0xdb03374034ca16afe997038266886327d1efd3af","tokens":1,"spenders":2,"active":1}
+{"ts":"2026-09-06T06:07:45.961Z","type":"scan","owner":"0xdb03374034ca16afe997038266886327d1efd3af","tokens":1,"spenders":2,"active":1}
