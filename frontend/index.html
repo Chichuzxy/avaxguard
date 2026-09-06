@@ -155,6 +155,7 @@
     <div id="itemList"></div>
     <div class="row">
       <button class="secondary" id="btnReport">生成 AI 风险报告</button>
+      <button class="green" id="btnRevokeAll" style="display:none">🛡 批量撤销全部授权</button>
     </div>
     <div class="report" id="reportBox"></div>
   </div>
@@ -275,8 +276,9 @@ function renderItems(items) {
   const list = $('itemList');
   list.innerHTML = '';
   const active = items.filter((i) => i.grade.level !== 'none');
-  // 无风险时隐藏"生成 AI 报告"按钮 (省额度, 也避免无意义的 AI 调用)
+  // 无风险时隐藏"生成 AI 报告"和"批量撤销"按钮 (省额度, 也避免无意义的调用)
   $('btnReport').style.display = active.length ? '' : 'none';
+  $('btnRevokeAll').style.display = active.length > 1 ? '' : 'none';
   if (!active.length) {
     list.innerHTML = '<div style="color:var(--green);padding:8px">✅ 未发现活跃授权, 资产状态良好。</div>';
     return;
@@ -286,8 +288,10 @@ function renderItems(items) {
     const div = document.createElement('div');
     div.className = 'item';
     const label = it.grade.label ? ' · ' + it.grade.label : '';
+    // 勾选框: 每条授权可单独选择, 配合"批量撤销选中"
     div.innerHTML = `
       <div class="top">
+        <input type="checkbox" class="revoke-check" data-token="${it.token}" data-spender="${it.spender}" style="width:18px;height:18px;cursor:pointer;flex:none">
         <span class="lv ${it.grade.level}">${it.grade.level === 'critical' ? '严重' : it.grade.level === 'high' ? '高' : it.grade.level === 'medium' ? '中' : '无'}</span>
         <span class="spender">${it.spender}</span>${label}
       </div>
@@ -303,6 +307,23 @@ function renderItems(items) {
   list.querySelectorAll('button[data-act]').forEach((btn) => {
     btn.addEventListener('click', () => onItemAction(btn));
   });
+  // 勾选框变化时更新批量按钮文案
+  list.querySelectorAll('.revoke-check').forEach((cb) => {
+    cb.addEventListener('change', () => updateRevokeAllBtn());
+  });
+  updateRevokeAllBtn();
+}
+
+function updateRevokeAllBtn() {
+  const checked = document.querySelectorAll('.revoke-check:checked').length;
+  const btn = $('btnRevokeAll');
+  if (checked > 0) {
+    btn.textContent = '🛡 撤销选中授权 (' + checked + ')';
+    btn.style.display = '';
+  } else {
+    btn.textContent = '🛡 批量撤销全部授权';
+    btn.style.display = 'none';
+  }
 }
 
 // ---------- item actions ----------
@@ -353,6 +374,51 @@ async function onItemAction(btn) {
     setStatus('Revoke 失败/被取消: ' + (e.message || e));
   }
 }
+
+// 构造 approve(spender, 0) 交易 data (复用)
+function approveZeroData(spender) {
+  return '0x095ea7b3' +
+    spender.toLowerCase().replace(/^0x/, '').padStart(64, '0') +
+    '0'.repeat(64);
+}
+
+// 批量撤销: 勾选哪些就撤哪些 (逐笔 MetaMask 签名)
+$('btnRevokeAll').addEventListener('click', async () => {
+  if (!window.ethereum) { setStatus('批量撤销需要连接 MetaMask'); return; }
+  const checks = Array.from(document.querySelectorAll('.revoke-check:checked'));
+  if (!checks.length) { setStatus('请先勾选要撤销的授权'); return; }
+  let from = currentOwner;
+  if (!from) {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    from = accounts[0];
+  }
+  const reportBox = $('reportBox');
+  reportBox.classList.add('show');
+  reportBox.innerHTML = '<span class="spin"></span> 正在批量撤销 ' + checks.length + ' 项授权...';
+  let done = 0, failed = 0;
+  for (const cb of checks) {
+    const token = cb.dataset.token;
+    const spender = cb.dataset.spender;
+    const itemBox = cb.closest('.item').querySelector('.txresult');
+    try {
+      itemBox.classList.add('show');
+      itemBox.innerHTML = '<span class="spin"></span> 等待签名...';
+      const data = approveZeroData(spender);
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{ from, to: token, data, gas: '0xea60' }],
+      });
+      itemBox.innerHTML = `✅ 已撤销 (${tokenSymbol(token)})<br><code>${txHash.slice(0, 14)}...</code>`;
+      done++;
+    } catch (e) {
+      itemBox.innerHTML = '<span style="color:var(--red)">跳过: ' + (e.message || e) + '</span>';
+      failed++;
+    }
+    reportBox.innerHTML = '<span class="spin"></span> 批量撤销进度: ' + done + ' 成功 / ' + failed + ' 失败';
+  }
+  reportBox.innerHTML = '批量撤销完成: ' + done + ' 项成功' + (failed ? ', ' + failed + ' 项失败/跳过' : '') + '。<br>可重新扫描确认链上状态。';
+  markStep(4);
+});
 
 async function verifyTx(txHash, box, token, owner, spender) {
   try {
