@@ -190,6 +190,19 @@ let refreshOn = false;        // 实时刷新开关
 let selectedKeys = new Set(); // 已勾选的 token+spender (刷新后保留勾选)
 let txResults = {};           // token+spender -> revoke 结果 HTML (刷新后保留)
 
+// localStorage 持久化撤销记录 (刷新页面/重开浏览器不丢, 扫描时可加载历史记录)
+function loadTxResults() {
+  try {
+    const s = localStorage.getItem('avaxguard_tx_results');
+    if (s) txResults = JSON.parse(s);
+  } catch (e) { /* 忽略 */ }
+}
+function saveTxResults() {
+  try {
+    localStorage.setItem('avaxguard_tx_results', JSON.stringify(txResults));
+  } catch (e) { /* 忽略 */ }
+}
+
 // ---------- helpers ----------
 function humanAmount(amtStr) {
   // MockUSDC 6 decimals
@@ -410,6 +423,7 @@ async function onItemAction(btn) {
       <button class="small green" style="margin-top:6px" data-verify="${txHash}" data-token="${token}" data-spender="${spender}">验证链上结果</button>
       <button class="small secondary" style="margin-top:6px;margin-left:6px" data-clear="${key}">✕ 清除记录</button>`;
     box.innerHTML = txResults[key];
+    saveTxResults(); // 持久化, 刷新后仍可加载
     // 验证按钮改用 data-verify 委托, 刷新后重建也有效
     bindVerifyButtons();
     bindClearButtons();
@@ -426,6 +440,7 @@ function bindClearButtons() {
     btn._boundClear = true;
     btn.addEventListener('click', () => {
       delete txResults[btn.dataset.clear];
+      saveTxResults(); // 持久化清除操作
       if (currentOwner) doScan(currentOwner, true); // 重扫刷新列表
     });
   });
@@ -539,6 +554,7 @@ $('btnReport').addEventListener('click', async () => {
 
 // ---------- init ----------
 (async function init() {
+  loadTxResults(); // 加载历史撤销记录 (刷新后保留)
   try {
     const h = await fetch('/api/health').then((r) => r.json());
     if (h.ok) {
