@@ -5,7 +5,8 @@
 ## 团队信息 (Team)
 
 - 项目名称: AvaxGuard (Avalanche 授权安全管家)
-- 成员: 奇楚兹克 / l0o0l666 / 库奥莱娅
+- 团队: Kule
+- 成员: Chichuzxy / l0o0l666 / KUOLEYA
 - 联系方式: GitHub: Chichuzxy
 
 ## 1. 项目简介 (Project Overview)
