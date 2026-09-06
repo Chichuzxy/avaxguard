@@ -55,9 +55,9 @@ ERC-20 授权遗忘是链上资产被盗最高频的入口之一,
 ## 7. 真实实现与证据 (Validation)
 
 合约 (Fuji Testnet):
-- MockUSDC: [部署后填地址]
-- AllowanceScanner: [部署后填地址]
-- 部署 tx: [部署后填 hash]
+- MockUSDC: 0xAAdefe134d613bED06EBb6Ce3Bc86bDE9d1378E5
+- AllowanceScanner: 0x41bE9Eb9035A25Bd3869C30EEee6989E5C68830E
+- 部署 tx: 0x7feac5ed1186b3c3bc37ee937eff003c5f0136c016e1b74615b3b03def435894 (MockUSDC)
 - Explorer: https://subnets-test.avax.network/c-chain
 
 测试: forge test 5/5 通过 (截图见 evidence/)
