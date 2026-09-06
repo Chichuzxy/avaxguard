@@ -1,0 +1,16 @@
+AvaxGuard 部署证据补充 (MockUSDT, 多 token 演示)
+部署时间: 2026-09-06 15:48
+
+【合约地址】
+MockUSDT: 0x88C882b1C885CcfCDBb2589726E50d0427f6566E
+
+【风险场景 (mUSDT)】
+SPENDER_NORMAL (0x0000...dead): allowance 1000e6 (高)
+SPENDER_RISKY  (0x1111...1111): allowance 300e6 (中)
+
+【部署 tx】
+0x7feac5ed1186b3c3bc37ee937eff003c5f0136c016e1b74615b3b03def435894 之前
+(见 contracts/broadcast/DeployUSDT.s.sol/43113/run-latest.json)
+
+【验证链接】
+https://subnets-test.avax.network/c-chain/address/0x88C882b1C885CcfCDBb2589726E50d0427f6566E

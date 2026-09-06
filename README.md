@@ -57,6 +57,7 @@ ERC-20 授权遗忘是链上资产被盗最高频的入口之一,
 
 合约 (Fuji Testnet):
 - MockUSDC: 0xAAdefe134d613bED06EBb6Ce3Bc86bDE9d1378E5
+- MockUSDT: 0x88C882b1C885CcfCDBb2589726E50d0427f6566E
 - AllowanceScanner: 0x41bE9Eb9035A25Bd3869C30EEee6989E5C68830E
 - 部署 tx: 0x7feac5ed1186b3c3bc37ee937eff003c5f0136c016e1b74615b3b03def435894 (MockUSDC)
 - Explorer: https://subnets-test.avax.network/c-chain
@@ -105,12 +106,14 @@ ERC-20 授权遗忘是链上资产被盗最高频的入口之一,
 | 功能 | 状态 |
 |------|------|
 | 授权扫描 (多 token x 多 spender) | 已实现 |
+| 多 token 支持 (MockUSDC + MockUSDT) | 已实现 |
 | 风险分级 (严重/高/中/无) | 已实现 |
 | AI 中文报告 (DeepSeek 润色 + 规则引擎兜底) | 已实现 |
 | 模拟预览 (eth_call) | 已实现 |
 | Revoke (MetaMask 签名) | 已实现 |
 | 链上验证 (receipt + 回读 allowance) | 已实现 |
-| 批量 revoke | 计划中 |
+| 勾选式批量 revoke | 已实现 |
+| 实时刷新 (4s 静默重扫, 保留勾选) | 已实现 |
 
 ## 评分维度对齐 (Judging alignment)
 
