@@ -350,6 +350,7 @@ function renderItems(items) {
   });
   updateRevokeAllBtn();
   bindVerifyButtons(); // 恢复出来的验证按钮也要能点击
+  bindClearButtons();  // 恢复出来的清除按钮也要能点击
 }
 
 function updateRevokeAllBtn() {
@@ -403,17 +404,31 @@ async function onItemAction(btn) {
       // 指定 gas 避免 MetaMask 估算往返 (approve 固定 gas ~46k, 给 60k 保险)
       params: [{ from, to: token, data, gas: '0xea60' }],
     });
-    // 存进 txResults, 实时刷新重绘时保留结果 + 验证按钮
+    // 存进 txResults, 实时刷新重绘时保留结果 + 验证按钮 (默认保留, 可手动清除)
     const key = (token + spender).toLowerCase();
     txResults[key] = `✅ 交易已广播<br>txHash: <code>${txHash}</code><br>
-      <button class="small green" style="margin-top:6px" data-verify="${txHash}" data-token="${token}" data-spender="${spender}">验证链上结果</button>`;
+      <button class="small green" style="margin-top:6px" data-verify="${txHash}" data-token="${token}" data-spender="${spender}">验证链上结果</button>
+      <button class="small secondary" style="margin-top:6px;margin-left:6px" data-clear="${key}">✕ 清除记录</button>`;
     box.innerHTML = txResults[key];
     // 验证按钮改用 data-verify 委托, 刷新后重建也有效
     bindVerifyButtons();
+    bindClearButtons();
     markStep(4);
   } catch (e) {
     setStatus('Revoke 失败/被取消: ' + (e.message || e));
   }
+}
+
+// 清除记录: 移除该条撤销结果, 让归零的授权不再显示 (默认保留)
+function bindClearButtons() {
+  document.querySelectorAll('button[data-clear]').forEach((btn) => {
+    if (btn._boundClear) return;
+    btn._boundClear = true;
+    btn.addEventListener('click', () => {
+      delete txResults[btn.dataset.clear];
+      if (currentOwner) doScan(currentOwner, true); // 重扫刷新列表
+    });
+  });
 }
 
 // 统一绑定验证按钮 (渲染后调用, 刷新重建后依然有效)
