@@ -1,0 +1,21 @@
+# Foundry 编译产物
+contracts/out/
+contracts/cache/
+contracts/lib/
+contracts/broadcast/
+
+# IDE
+.idea/
+
+# 敏感信息
+backend/.env
+backend/events.jsonl
+backend/server.log
+
+# 内部文档 (不提交仓库, 仅本地保留)
+现场执行手册.txt
+给队友的项目说明.txt
+PPT素材.txt
+
+# node
+node_modules/

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AvaxGuard - Avalanche 授权安全管家</title>
+<style>
+  :root {
+    --bg: #FFF8ED;
+    --card: #FFFFFF;
+    --cream: #FDF1DC;
+    --orange: #E8863A;
+    --orange-dark: #C96A22;
+    --bamboo: #6BA368;
+    --ink: #3D2E23;
+    --muted: #8A7A6A;
+    --red: #D64545;
+    --yellow: #E0A226;
+    --green: #4C9A5A;
+    --border: #F0E0C8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  .container { max-width: 860px; margin: 0 auto; padding: 16px; }
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 0 12px; border-bottom: 2px solid var(--border);
+  }
+  .logo { font-size: 34px; }
+  header h1 { font-size: 22px; color: var(--orange-dark); }
+  header .sub { font-size: 13px; color: var(--muted); }
+  .badge {
+    margin-left: auto; font-size: 12px; padding: 4px 12px;
+    border-radius: 20px; background: var(--bamboo); color: #fff;
+  }
+  .steps {
+    display: flex; justify-content: space-between; margin: 16px 0;
+    font-size: 12px; color: var(--muted);
+  }
+  .steps .step { display: flex; align-items: center; gap: 6px; }
+  .steps .num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--cream); border: 1.5px solid var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; color: var(--orange-dark);
+  }
+  .steps .step.done .num { background: var(--orange); color: #fff; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .card h2 { font-size: 15px; margin-bottom: 10px; color: var(--orange-dark); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input[type=text] {
+    flex: 1; min-width: 220px; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 14px; background: #fff; color: var(--ink);
+    font-family: monospace;
+  }
+  button {
+    padding: 10px 18px; border: none; border-radius: 10px;
+    background: var(--orange); color: #fff; font-size: 14px;
+    cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  button:hover { background: var(--orange-dark); }
+  button.secondary { background: var(--cream); color: var(--orange-dark); border: 1.5px solid var(--orange); }
+  button.secondary:hover { background: var(--border); }
+  button.green { background: var(--bamboo); }
+  button.green:hover { background: #558F52; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button.small { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+  .conn-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .conn-hint code { background: var(--cream); padding: 1px 6px; border-radius: 6px; }
+
+  .item {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; margin-bottom: 10px; background: #FFFCF5;
+  }
+  .item .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .item .spender { font-family: monospace; font-size: 13px; word-break: break-all; }
+  .item .meta { font-size: 12px; color: var(--muted); margin: 6px 0; font-family: monospace; }
+  .item .reason { font-size: 13px; margin: 6px 0; }
+  .item .actions { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .lv {
+    font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600;
+  }
+  .lv.critical { background: var(--red); color: #fff; }
+  .lv.high { background: var(--yellow); color: #fff; }
+  .lv.medium { background: #E8B44C; color: #fff; }
+  .lv.none { background: var(--green); color: #fff; }
+  .txresult {
+    font-family: monospace; font-size: 12px; background: var(--cream);
+    padding: 10px; border-radius: 10px; margin-top: 8px; word-break: break-all;
+    display: none;
+  }
+  .txresult.show { display: block; }
+  .report {
+    white-space: pre-wrap; font-size: 13px; line-height: 1.7;
+    background: var(--cream); padding: 12px; border-radius: 10px;
+    display: none; max-height: 220px; overflow-y: auto;
+  }
+  .report.show { display: block; }
+  .statusbar {
+    margin-top: 12px; font-size: 12px; color: var(--muted);
+    text-align: center; padding: 10px; border-top: 1px solid var(--border);
+  }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--orange); border-radius: 50%; animation: r .7s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  .err { color: var(--red); font-size: 13px; margin-top: 8px; }
+  a { color: var(--orange-dark); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">🐼</div>
+    <div>
+      <h1>AvaxGuard 授权安全管家</h1>
+      <div class="sub">Avalanche C-Chain · ERC-20 授权扫描 · 模拟预览 · 一键 Revoke</div>
+    </div>
+    <div class="badge">Fuji 测试网</div>
+  </header>
+
+  <div class="steps">
+    <div class="step" id="st1"><span class="num">1</span> 连接钱包 / 输入地址</div>
+    <div class="step" id="st2"><span class="num">2</span> 扫描授权</div>
+    <div class="step" id="st3"><span class="num">3</span> 模拟预览</div>
+    <div class="step" id="st4"><span class="num">4</span> Revoke & 验证</div>
+  </div>
+
+  <!-- Step 1: address -->
+  <div class="card">
+    <h2>第一步 · 谁的钱包?</h2>
+    <div class="row">
+      <button class="green" id="btnConnect">连接 MetaMask</button>
+      <span style="color:var(--muted);font-size:13px">或</span>
+      <input type="text" id="addressInput" placeholder="0x... 手动输入地址 (演示用)">
+      <button id="btnScan">扫描授权</button>
+    </div>
+    <div class="conn-hint">手动输入时仅读链查询, 不触发任何签名。Revoke 时需连接 MetaMask 签名。</div>
+    <div class="err" id="errBox"></div>
+  </div>
+
+  <!-- Step 2+3: allowance list -->
+  <div class="card" id="scanCard" style="display:none">
+    <h2>第二步 · 授权扫描结果</h2>
+    <div id="itemList"></div>
+    <div class="row">
+      <button class="secondary" id="btnReport">生成 AI 风险报告</button>
+    </div>
+    <div class="report" id="reportBox"></div>
+  </div>
+
+  <!-- Step 4: revoke result -->
+  <div class="card" id="resultCard" style="display:none">
+    <h2>第四步 · Revoke 结果</h2>
+    <div id="resultBody"></div>
+  </div>
+
+  <div class="statusbar">🔒 后端不碰私钥 · Revoke 交易由你的钱包签名 · 仅 Fuji 测试网</div>
+</div>
+
+<script>
+// ---------- config (token/spender 默认值由后端环境变量提供, 前端零配置) ----------
+const EXPLORER = 'https://subnets-test.avax.network/c-chain';
+
+const $ = (id) => document.getElementById(id);
+let currentOwner = null;
+let scanItems = [];
+
+// ---------- helpers ----------
+function humanAmount(amtStr) {
+  // MockUSDC 6 decimals
+  try {
+    const n = BigInt(amtStr || '0');
+    const whole = (n / 1000000n).toString();
+    const frac = (n % 1000000n).toString().padStart(6, '0').slice(0, 2);
+    const trimmed = frac.replace(/0+$/, '');
+    return whole + (trimmed ? '.' + trimmed : '');
+  } catch { return amtStr; }
+}
+
+function isMaxUint(hex) {
+  return (hex || '').toLowerCase() === '0x' + 'f'.repeat(64);
+}
+
+function shortAddr(a) {
+  return a ? a.slice(0, 6) + '...' + a.slice(-4) : '';
+}
+
+function setStatus(text, spin) {
+  const box = $('errBox');
+  box.className = 'err';
+  box.style.color = spin ? 'var(--muted)' : 'var(--red)';
+  box.innerHTML = (spin ? '<span class="spin"></span>' : '') + (text || '');
+}
+
+function markStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const el = $('st' + i);
+    if (i < n) el.classList.add('done');
+    else el.classList.remove('done');
+  }
+}
+
+async function api(path, body) {
+  const res = await fetch('/api' + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || '请求失败');
+  return json;
+}
+
+// ---------- connect wallet ----------
+$('btnConnect').addEventListener('click', async () => {
+  try {
+    if (!window.ethereum) {
+      setStatus('未检测到 MetaMask, 请安装或使用手动地址输入');
+      return;
+    }
+    setStatus('请求钱包授权...', true);
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (accounts && accounts.length) {
+      currentOwner = accounts[0];
+      $('addressInput').value = currentOwner;
+      setStatus('');
+    }
+  } catch (e) {
+    setStatus('钱包连接失败: ' + (e.message || e));
+  }
+});
+
+// ---------- scan ----------
+async function doScan(owner) {
+  setStatus('扫描链上授权...', true);
+  try {
+    const data = await api('/scan', { address: owner });
+    scanItems = data.items;
+    renderItems(scanItems);
+    $('scanCard').style.display = 'block';
+    markStep(2);
+    setStatus('');
+  } catch (e) {
+    setStatus('扫描失败: ' + e.message);
+  }
+}
+
+$('btnScan').addEventListener('click', () => {
+  const v = $('addressInput').value.trim();
+  if (!/^0x[0-9a-fA-F]{40}$/.test(v)) { setStatus('地址格式错误'); return; }
+  currentOwner = v;
+  doScan(v);
+});
+
+function renderItems(items) {
+  const list = $('itemList');
+  list.innerHTML = '';
+  const active = items.filter((i) => i.grade.level !== 'none');
+  // 无风险时隐藏"生成 AI 报告"按钮 (省额度, 也避免无意义的 AI 调用)
+  $('btnReport').style.display = active.length ? '' : 'none';
+  if (!active.length) {
+    list.innerHTML = '<div style="color:var(--green);padding:8px">✅ 未发现活跃授权, 资产状态良好。</div>';
+    return;
+  }
+  for (const it of active) {
+    const isMax = isMaxUint(it.allowanceHex);
+    const div = document.createElement('div');
+    div.className = 'item';
+    const label = it.grade.label ? ' · ' + it.grade.label : '';
+    div.innerHTML = `
+      <div class="top">
+        <span class="lv ${it.grade.level}">${it.grade.level === 'critical' ? '严重' : it.grade.level === 'high' ? '高' : it.grade.level === 'medium' ? '中' : '无'}</span>
+        <span class="spender">${it.spender}</span>${label}
+      </div>
+      <div class="meta">授权额度: ${isMax ? '∞ 无限授权' : it.amountHuman + ' mUSDC'} · token: ${shortAddr(it.token)}</div>
+      <div class="reason">${it.grade.reason}</div>
+      <div class="actions">
+        <button class="small secondary" data-act="preview" data-token="${it.token}" data-spender="${it.spender}">🔍 模拟预览</button>
+        <button class="small" data-act="revoke" data-token="${it.token}" data-spender="${it.spender}">🛡 Revoke</button>
+      </div>
+      <div class="txresult"></div>`;
+    list.appendChild(div);
+  }
+  list.querySelectorAll('button[data-act]').forEach((btn) => {
+    btn.addEventListener('click', () => onItemAction(btn));
+  });
+}
+
+// ---------- item actions ----------
+async function onItemAction(btn) {
+  const act = btn.dataset.act;
+  const token = btn.dataset.token;
+  const spender = btn.dataset.spender;
+  const box = btn.closest('.item').querySelector('.txresult');
+  box.classList.remove('show');
+  box.innerHTML = '';
+
+  if (act === 'preview') {
+    try {
+      box.classList.add('show');
+      box.innerHTML = '<span class="spin"></span> 模拟 revoke 交易中 (eth_call, 不广播)...';
+      const data = await api('/preview', { token, owner: currentOwner, spender });
+      box.innerHTML = `🔍 模拟预览 (eth_call 检查 approve(0) 是否会成功, 不广播):<br>当前授权: <b>${data.beforeHuman}</b> mUSDC → 预计执行后: <b>${data.afterHuman}</b><br>结论: <b>${data.verdict === 'READY_TO_REVOKE' ? '可安全 revoke, 签名后链上确认' : '无需操作'}</b>`;
+      return;
+    } catch (e) { box.classList.add('show'); box.innerHTML = '<span style="color:var(--red)">模拟失败: ' + e.message + '</span>'; return; }
+  }
+
+  // revoke
+  if (!window.ethereum) { setStatus('Revoke 需要连接 MetaMask'); return; }
+  try {
+    box.classList.add('show');
+    box.innerHTML = '<span class="spin"></span> 等待钱包签名 (approve = 0)...';
+    // 复用已连接账户, 不再重复 eth_requestAccounts (减少一次 RPC 往返)
+    let from = currentOwner;
+    if (!from) {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      from = accounts[0];
+    }
+    // approve(spender, 0): selector 0x095ea7b3 + spender + 0
+    const data = '0x095ea7b3' +
+      spender.toLowerCase().replace(/^0x/, '').padStart(64, '0') +
+      '0'.repeat(64);
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      // 指定 gas 避免 MetaMask 估算往返 (approve 固定 gas ~46k, 给 60k 保险)
+      params: [{ from, to: token, data, gas: '0xea60' }],
+    });
+    box.innerHTML = `✅ 交易已广播<br>txHash: <code>${txHash}</code><br>
+      <button class="small green" style="margin-top:6px" id="btnVerify_${txHash.slice(2, 8)}">验证链上结果</button>`;
+    const vbtn = box.querySelector('button');
+    vbtn.addEventListener('click', () => verifyTx(txHash, box, token, currentOwner, spender));
+    markStep(4);
+  } catch (e) {
+    setStatus('Revoke 失败/被取消: ' + (e.message || e));
+  }
+}
+
+async function verifyTx(txHash, box, token, owner, spender) {
+  try {
+    box.innerHTML = '<span class="spin"></span> 查询链上确认状态 + 回读 allowance...';
+    // verify 端点 PENDING 时返回 ok:false, 不能走 api() 的 ok 检查
+    const res = await fetch('/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ txHash, token, owner, spender }),
+    });
+    const data = await res.json();
+    let confirmLine = '';
+    if (data.revokeConfirmed) {
+      confirmLine = '<br><b style="color:var(--green)">链上回读确认: allowance 已归零 ✅</b>';
+    } else if (typeof data.allowanceAfter === 'string' && data.allowanceAfter !== '0') {
+      confirmLine = `<br><b style="color:var(--red)">allowance 未归零 (当前 ${data.allowanceAfter}) ⚠️</b>`;
+    }
+    box.innerHTML = (data.ok
+      ? `✅ 链上确认成功 (block ${data.blockNumber}, gas ${data.gasUsed})`
+      : (data.status === 'PENDING' ? '⏳ 交易待确认, 稍后重试' : '❌ 交易失败')) +
+      confirmLine +
+      `<br><a href="${EXPLORER}/tx/${txHash}" target="_blank">在浏览器查看交易 →</a>`;
+  } catch (e) {
+    box.innerHTML = '<span style="color:var(--red)">验证失败: ' + e.message + '</span>';
+  }
+}
+
+// ---------- AI report ----------
+$('btnReport').addEventListener('click', async () => {
+  const box = $('reportBox');
+  try {
+    // 加载动画显示在按钮下方 (reportBox), 而非顶部状态栏
+    box.classList.add('show');
+    box.innerHTML = '<span class="spin"></span> 正在生成 AI 风险报告...';
+    const items = scanItems.map((i) => ({ spender: i.spender, grade: i.grade }));
+    const data = await api('/report', { items });
+    box.textContent = data.report;
+    markStep(3);
+  } catch (e) {
+    box.classList.add('show');
+    box.innerHTML = '<span style="color:var(--red)">报告失败: ' + e.message + '</span>';
+  }
+});
+
+// ---------- init ----------
+(async function init() {
+  try {
+    const h = await fetch('/api/health').then((r) => r.json());
+    if (h.ok) {
+      setStatus('后端已连接 · Fuji 区块 #' + h.block + ' · 请连接钱包或输入地址');
+    }
+  } catch { setStatus('后端未连接, 请先启动: node server.js'); }
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts && accounts.length) {
+        currentOwner = accounts[0];
+        $('addressInput').value = currentOwner;
+      }
+    } catch {}
+  }
+})();
+</script>
+</body>
+</html>

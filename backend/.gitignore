@@ -1,0 +1,7 @@
+# 敏感信息不提交
+.env
+events.jsonl
+server.log
+
+# node
+node_modules/
