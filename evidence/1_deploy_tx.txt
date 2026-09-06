@@ -1,0 +1,21 @@
+AvaxGuard 部署证据 (Fuji Testnet, 2026-09-06)
+
+【合约地址】
+MockUSDC:        0xAAdefe134d613bED06EBb6Ce3Bc86bDE9d1378E5
+AllowanceScanner: 0x41bE9Eb9035A25Bd3869C30EEee6989E5C68830E
+部署者(演示钱包): 0xdb03374034ca16Afe997038266886327d1efd3af
+
+【部署交易 tx hash】
+1. CREATE MockUSDC:         0x7feac5ed1186b3c3bc37ee937eff003c5f0136c016e1b74615b3b03def435894
+2. CREATE AllowanceScanner: 0xf00b5e1567923bd2d200a24e3ff9d03fa556c147f534d0ff6208472be621cef2
+3. mint 10000 mUSDC:        0xf556c64443a3313e4bd9f53411f3e3856e2e18c9b0c73b3916eaf7468c1ea24f
+4. approve(0xdead, 500):    0x783f299700dfe019831558bfab376b470d81047eb4c48bd64546d915741c28d7
+5. approve(0x1111, max):    0xf4efdd7169203c4ff8040205cab02d6768ed34a93d481fbb345499aa05c419a6
+
+【风险场景】
+SPENDER_NORMAL (0x0000...dead): allowance 500e6 (正常 dApp 标签)
+SPENDER_RISKY  (0x1111...1111): allowance max (钓鱼合约标签)
+
+【验证链接】
+MockUSDC: https://subnets-test.avax.network/c-chain/address/0xAAdefe134d613bED06EBb6Ce3Bc86bDE9d1378E5
+Scanner:  https://subnets-test.avax.network/c-chain/address/0x41bE9Eb9035A25Bd3869C30EEee6989E5C68830E

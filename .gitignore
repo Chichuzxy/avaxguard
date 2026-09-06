@@ -9,6 +9,7 @@ contracts/broadcast/
 
 # 敏感信息
 backend/.env
+contracts/.env
 backend/events.jsonl
 backend/server.log
 
