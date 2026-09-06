@@ -188,6 +188,7 @@ let scanItems = [];
 let refreshTimer = null;      // 实时刷新定时器
 let refreshOn = false;        // 实时刷新开关
 let selectedKeys = new Set(); // 已勾选的 token+spender (刷新后保留勾选)
+let txResults = {};           // token+spender -> revoke 结果 HTML (刷新后保留)
 
 // ---------- helpers ----------
 function humanAmount(amtStr) {
@@ -302,7 +303,8 @@ function updateRefreshBtn() {
 function renderItems(items) {
   const list = $('itemList');
   list.innerHTML = '';
-  const active = items.filter((i) => i.grade.level !== 'none');
+  // 活跃授权 + 有 revoke 结果的项(即使已归零也保留显示, 让用户看到撤销结果)
+  const active = items.filter((i) => i.grade.level !== 'none' || txResults[(i.token + i.spender).toLowerCase()]);
   // 无风险时隐藏"生成 AI 报告"和"批量撤销"按钮 (省额度, 也避免无意义的调用)
   $('btnReport').style.display = active.length ? '' : 'none';
   $('btnRevokeAll').style.display = active.length > 1 ? '' : 'none';
@@ -318,6 +320,8 @@ function renderItems(items) {
     // 勾选框: 每条授权可单独选择, 配合"批量撤销选中"; 刷新后恢复勾选
     const key = (it.token + it.spender).toLowerCase();
     const checked = selectedKeys.has(key) ? 'checked' : '';
+    // 刷新后恢复 revoke 结果 (避免实时刷新冲掉 txHash + 验证按钮)
+    const savedTx = txResults[key] || '';
     div.innerHTML = `
       <div class="top">
         <input type="checkbox" class="revoke-check" data-token="${it.token}" data-spender="${it.spender}" ${checked} style="width:18px;height:18px;cursor:pointer;flex:none">
@@ -330,7 +334,7 @@ function renderItems(items) {
         <button class="small secondary" data-act="preview" data-token="${it.token}" data-spender="${it.spender}">🔍 模拟预览</button>
         <button class="small" data-act="revoke" data-token="${it.token}" data-spender="${it.spender}">🛡 Revoke</button>
       </div>
-      <div class="txresult"></div>`;
+      <div class="txresult${savedTx ? ' show' : ''}">${savedTx}</div>`;
     list.appendChild(div);
   }
   list.querySelectorAll('button[data-act]').forEach((btn) => {
@@ -345,6 +349,7 @@ function renderItems(items) {
     });
   });
   updateRevokeAllBtn();
+  bindVerifyButtons(); // 恢复出来的验证按钮也要能点击
 }
 
 function updateRevokeAllBtn() {
@@ -398,14 +403,32 @@ async function onItemAction(btn) {
       // 指定 gas 避免 MetaMask 估算往返 (approve 固定 gas ~46k, 给 60k 保险)
       params: [{ from, to: token, data, gas: '0xea60' }],
     });
-    box.innerHTML = `✅ 交易已广播<br>txHash: <code>${txHash}</code><br>
-      <button class="small green" style="margin-top:6px" id="btnVerify_${txHash.slice(2, 8)}">验证链上结果</button>`;
-    const vbtn = box.querySelector('button');
-    vbtn.addEventListener('click', () => verifyTx(txHash, box, token, currentOwner, spender));
+    // 存进 txResults, 实时刷新重绘时保留结果 + 验证按钮
+    const key = (token + spender).toLowerCase();
+    txResults[key] = `✅ 交易已广播<br>txHash: <code>${txHash}</code><br>
+      <button class="small green" style="margin-top:6px" data-verify="${txHash}" data-token="${token}" data-spender="${spender}">验证链上结果</button>`;
+    box.innerHTML = txResults[key];
+    // 验证按钮改用 data-verify 委托, 刷新后重建也有效
+    bindVerifyButtons();
     markStep(4);
   } catch (e) {
     setStatus('Revoke 失败/被取消: ' + (e.message || e));
   }
+}
+
+// 统一绑定验证按钮 (渲染后调用, 刷新重建后依然有效)
+function bindVerifyButtons() {
+  document.querySelectorAll('button[data-verify]').forEach((btn) => {
+    if (btn._bound) return;
+    btn._bound = true;
+    btn.addEventListener('click', () => {
+      const txHash = btn.dataset.verify;
+      const token = btn.dataset.token;
+      const spender = btn.dataset.spender;
+      const box = btn.closest('.item').querySelector('.txresult');
+      verifyTx(txHash, box, token, currentOwner, spender);
+    });
+  });
 }
 
 // 构造 approve(spender, 0) 交易 data (复用)
