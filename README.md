@@ -60,6 +60,7 @@ ERC-20 授权遗忘是链上资产被盗最高频的入口之一,
 - MockUSDT: 0x88C882b1C885CcfCDBb2589726E50d0427f6566E
 - AllowanceScanner: 0x41bE9Eb9035A25Bd3869C30EEee6989E5C68830E
 - 部署 tx: 0x7feac5ed1186b3c3bc37ee937eff003c5f0136c016e1b74615b3b03def435894 (MockUSDC)
+- revoke tx: 0xe05289aaaca36bbeef3efdb99412ae20b3e57f502ba1ae5483d21f2a0e45093a
 - Explorer: https://subnets-test.avax.network/c-chain
 
 测试: forge test 5/5 通过 (截图见 evidence/)
@@ -95,8 +96,8 @@ ERC-20 授权遗忘是链上资产被盗最高频的入口之一,
 
 后续计划:
 - 真实 USDC/USDT 地址库 + 定时授权监控告警
-- 批量 revoke (多个 spender 一次处理)
-- Approval event indexer 全量扫描
+- Approval event indexer 全量扫描 (突破 curated 列表限制)
+- 一键全选撤销 + 跨 token 统一 revoke
 - 申请 Team1 Builder Grants 继续打磨
 
 ---
@@ -114,6 +115,7 @@ ERC-20 授权遗忘是链上资产被盗最高频的入口之一,
 | 链上验证 (receipt + 回读 allowance) | 已实现 |
 | 勾选式批量 revoke | 已实现 |
 | 实时刷新 (4s 静默重扫, 保留勾选) | 已实现 |
+| 撤销记录持久化 (localStorage, 可清除) | 已实现 |
 
 ## 评分维度对齐 (Judging alignment)
 
